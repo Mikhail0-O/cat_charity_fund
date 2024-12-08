@@ -1,11 +1,9 @@
 from typing import Optional
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from pydantic import (BaseModel, Field,
                       validator, Extra,
                       PositiveInt, StrictStr, root_validator)
-
-from app.crud.charity_project import charity_project_crud
 
 
 class CharityProjectCreate(BaseModel):

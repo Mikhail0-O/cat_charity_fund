@@ -30,12 +30,14 @@ async def create_new_donation(
     )
     all_uninvested_projects = await session.execute(
         select(CharityProject).where(
-            CharityProject.fully_invested == False
+            CharityProject.fully_invested == False # noqa
         ).order_by(CharityProject.create_date)
     )
     all_uninvested_projects = all_uninvested_projects.scalars().all()
     for project in all_uninvested_projects:
-        donation_change = new_donation.full_amount - new_donation.invested_amount
+        donation_change = (
+            new_donation.full_amount - new_donation.invested_amount
+        )
         project_change = project.full_amount - project.invested_amount
 
         if donation_change >= project_change:
