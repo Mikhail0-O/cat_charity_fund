@@ -9,6 +9,8 @@ async def check_name_duplicate(
         room_name: str,
         session: AsyncSession,
 ) -> None:
+    """Проверка на уникальность названия проекта."""
+
     project_id = await charity_project_crud.get_project_id_by_name(
         room_name, session
     )
@@ -23,6 +25,14 @@ async def check_charity_project_open_or_close(
         project_id: int,
         session: AsyncSession,
 ) -> CharityProject:
+    """Существование проекта, проект не проинвестирован или не закрыт.
+
+    Валидация следующих случаев:
+    1) Проект с переданным id существует в базе данных.
+    2) Проект не проинвестирован.
+    3) Проект не закрыт.
+    """
+
     charity_project = await charity_project_crud.get(
         obj_id=project_id, session=session
     )
@@ -48,7 +58,6 @@ async def check_charity_project_empty(
         session: AsyncSession,
 ) -> CharityProject:
     charity_project = await charity_project_crud.get(
-        # Для понятности кода можно передавать аргументы по ключу.
         obj_id=project_id, session=session
     )
     if charity_project.invested_amount > 0:

@@ -73,7 +73,6 @@ async def update_project(
     project = await check_charity_project_open_or_close(
         project_id, session
     )
-    print(obj_in.dict())
     if obj_in.name is not None:
         await check_name_duplicate(obj_in.name, session)
     project = await charity_project_crud.update(

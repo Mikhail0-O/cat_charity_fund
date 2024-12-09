@@ -643,7 +643,6 @@ def test_donation_exist_project_create(superuser_client, donation):
         },
     )
     data = response.json()
-    print('___-----___', data)
     assert data['fully_invested'], (
         'Если при редактировании проекта новая требуемая сумма '
         'равна уже внесённой - проект должен быть '
