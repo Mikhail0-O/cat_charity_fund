@@ -25,18 +25,21 @@ QRKot — это приложение для управления благотв
 
 1. Клонируйте репозиторий:
 
-```
+```bash
 git clone https://github.com/ваш-аккаунт/cat_charity_fund.git
 cd cat_charity_fund
 ```
 
-Создайте и активируйте виртуальное окружение:
-bash
-Копировать код
+2. Создайте и активируйте виртуальное окружение:
+
+```bash
 python -m venv venv
 source venv/bin/activate  # для Linux/macOS
-venv\Scripts\activate     # для Windows
-Установите зависимости:
-bash
-Копировать код
+source venv/Scripts/activate     # для Windows
+```
+
+3. Установите зависимости:
+
+```bash
 pip install -r requirements.txt
+```
