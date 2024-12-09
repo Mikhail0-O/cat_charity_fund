@@ -56,3 +56,5 @@ uvicorn app.main:app --reload
 2. Откройте документацию API в ReDoc:
 
 - Загрузите спецификацию openapi.json на ReDoc.
+
+### Документация будет доступна по адресу http://127.0.0.1:8000/docs/
