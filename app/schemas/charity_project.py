@@ -1,9 +1,8 @@
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
-from pydantic import (BaseModel, Field,
-                      validator, Extra,
-                      PositiveInt, StrictStr, root_validator)
+from pydantic import (BaseModel, Extra, Field, PositiveInt, StrictStr,
+                      root_validator, validator)
 
 
 class CharityProjectCreate(BaseModel):

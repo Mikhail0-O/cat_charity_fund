@@ -15,7 +15,6 @@ class CRUDDonation(CRUDBase):
             user: User
     ):
         donations = await session.execute(
-            # Получить все объекты Reservation.
             select(Donation).where(
                 Donation.user_id == user.id,
             )
