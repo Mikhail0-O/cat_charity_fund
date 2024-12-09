@@ -2,6 +2,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.crud.charity_project import charity_project_crud
 from app.schemas.charity_project import (
@@ -13,6 +14,8 @@ from app.api.validators import (
     check_charity_project_empty,
     check_project_full_amount_not_lt_full_amount_current)
 from app.core.user import current_superuser
+from app.models import Donation
+
 
 router = APIRouter()
 
@@ -28,8 +31,22 @@ async def create_new_charity_project(
     """Только для суперюзеров."""
 
     await check_name_duplicate(charity_project.name, session)
-    new_room = await charity_project_crud.create(charity_project, session)
-    return new_room
+    new_project = await charity_project_crud.create(charity_project, session)
+    unallocated_donations = await session.execute(
+        select(Donation).where(
+            Donation.fully_invested == False # noqa
+        ).order_by(Donation.create_date)
+    )
+    sum_unallocated_donations = sum(
+        [unallocated_donation.full_amount for unallocated_donation
+            in unallocated_donations.scalars().all()]
+    )
+    if sum_unallocated_donations >= new_project.full_amount:
+        new_project.fully_invested = True
+        new_project.close_date = datetime.now()
+    await session.commit()
+    await session.refresh(new_project)
+    return new_project
 
 
 @router.get('/',
