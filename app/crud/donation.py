@@ -33,5 +33,13 @@ class CRUDDonation(CRUDBase):
         )
         return uninvested_projects.scalars().all()
 
+    async def refresh_db(
+            self,
+            session: AsyncSession,
+            donation: Donation
+    ):
+        await session.commit()
+        await session.refresh(donation)
+
 
 donation_crud = CRUDDonation(Donation)

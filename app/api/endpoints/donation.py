@@ -10,6 +10,7 @@ from app.crud.donation import donation_crud
 from app.models import CharityProject, User
 from app.schemas.donation import (DonationCreate, DonationDB,
                                   DonationDBForSuperUsers)
+from app.core.investing import the_logic_of_investing
 
 
 router = APIRouter()
@@ -31,25 +32,8 @@ async def create_new_donation(
     all_uninvested_projects = await donation_crud.get_uninvested_projects(
         session
     )
-    for project in all_uninvested_projects:
-        donation_change = (
-            new_donation.full_amount - new_donation.invested_amount
-        )
-        project_change = project.full_amount - project.invested_amount
-
-        if donation_change >= project_change:
-            new_donation.invested_amount += project_change
-            project.invested_amount = project.full_amount
-            project.fully_invested = True
-            project.close_date = datetime.now()
-        else:
-            project.invested_amount += donation_change
-            new_donation.invested_amount = new_donation.full_amount
-            new_donation.fully_invested = True
-            new_donation.close_date = datetime.now()
-            break
-    await session.commit()
-    await session.refresh(new_donation)
+    the_logic_of_investing(all_uninvested_projects, new_donation)
+    await donation_crud.refresh_db(session, new_donation)
     return new_donation
 
 
@@ -60,8 +44,7 @@ async def get_all_donation(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user),
 ):
-    all_donation = await donation_crud.get_by_user(session=session, user=user)
-    return all_donation
+    return await donation_crud.get_by_user(session=session, user=user)
 
 
 @router.get('/',
@@ -72,5 +55,5 @@ async def get_all_donations(
     session: AsyncSession = Depends(get_async_session),
 ):
     """Только для суперюзеров."""
-    all_donations = await donation_crud.get_multi(session)
-    return all_donations
+
+    return await donation_crud.get_multi(session)
