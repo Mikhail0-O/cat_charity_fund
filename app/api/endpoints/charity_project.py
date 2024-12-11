@@ -54,8 +54,7 @@ async def create_new_charity_project(
 async def get_all_meeting_rooms(
     session: AsyncSession = Depends(get_async_session),
 ):
-    all_rooms = await charity_project_crud.get_multi(session)
-    return all_rooms
+    return await charity_project_crud.get_multi(session)
 
 
 @router.patch('/{project_id}',
@@ -106,8 +105,7 @@ async def delete_project(
     project = await check_charity_project_empty(
         project_id, session
     )
-    project = await charity_project_crud.remove(
+    return await charity_project_crud.remove(
         db_obj=project,
         session=session,
     )
-    return project

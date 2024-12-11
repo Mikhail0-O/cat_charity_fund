@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.charity_project import charity_project_crud
 from app.models import CharityProject
+from http import HTTPStatus
 
 
 async def check_name_duplicate(
@@ -16,7 +17,7 @@ async def check_name_duplicate(
     )
     if project_id is not None:
         raise HTTPException(
-            status_code=400,
+            status_code=HTTPStatus.BAD_REQUEST,
             detail='Проект с таким именем уже существует!',
         )
 
@@ -37,16 +38,18 @@ async def check_charity_project_open_or_close(
         obj_id=project_id, session=session
     )
     if not charity_project:
-        raise HTTPException(status_code=404, detail='Проект не найден!')
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail='Проект не найден!'
+        )
     if charity_project.invested_amount == charity_project.full_amount:
         raise HTTPException(
-            status_code=400,
+            status_code=HTTPStatus.BAD_REQUEST,
             detail=('Невозможно редактировать или '
                     'удалять проинвестированный проект!')
         )
     if charity_project.fully_invested:
         raise HTTPException(
-            status_code=400,
+            status_code=HTTPStatus.BAD_REQUEST,
             detail=('Невозможно редактировать или '
                     'удалять закрытый проект!')
         )
@@ -62,7 +65,7 @@ async def check_charity_project_empty(
     )
     if charity_project.invested_amount > 0:
         raise HTTPException(
-            status_code=400,
+            status_code=HTTPStatus.BAD_REQUEST,
             detail=('Невозможно редактировать или '
                     'удалять проект с пожертвованиями!')
         )
@@ -77,7 +80,7 @@ async def check_project_full_amount_not_lt_full_amount_current(
     )
     if (obj['full_amount'] < charity_project.invested_amount):
         raise HTTPException(
-            status_code=422,
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
             detail=('Невозможно редактировать требуемую сумму '
                     'если новая меньше текущей')
         )

@@ -4,10 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud.base import CRUDBase
 from app.models.donation import Donation
 from app.models.user import User
+from app.models.charity_project import CharityProject
 
 
 class CRUDDonation(CRUDBase):
-    pass
 
     async def get_by_user(
             self,
@@ -19,8 +19,19 @@ class CRUDDonation(CRUDBase):
                 Donation.user_id == user.id,
             )
         )
-        print(user.id, type(Donation.user_id))
         return donations.scalars().all()
+
+    async def get_uninvested_projects(
+            self,
+            session: AsyncSession,
+    ):
+        uninvested_projects = await session.execute(
+            select(CharityProject).where(
+                CharityProject.fully_invested == False # noqa 
+
+            ).order_by(CharityProject.create_date)
+        )
+        return uninvested_projects.scalars().all()
 
 
 donation_crud = CRUDDonation(Donation)

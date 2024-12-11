@@ -28,12 +28,9 @@ async def create_new_donation(
     new_donation = await donation_crud.create(
         donation, session, user
     )
-    all_uninvested_projects = await session.execute(
-        select(CharityProject).where(
-            CharityProject.fully_invested == False # noqa
-        ).order_by(CharityProject.create_date)
+    all_uninvested_projects = await donation_crud.get_uninvested_projects(
+        session
     )
-    all_uninvested_projects = all_uninvested_projects.scalars().all()
     for project in all_uninvested_projects:
         donation_change = (
             new_donation.full_amount - new_donation.invested_amount

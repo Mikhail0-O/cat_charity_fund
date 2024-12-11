@@ -19,8 +19,7 @@ class CRUDMeetingRoom(CRUDBase):
                 CharityProject.name == project_name
             )
         )
-        db_project_id = db_project_id.scalars().first()
-        return db_project_id
+        return db_project_id.scalars().first()
 
     async def get_project_full_amount_by_name(
             self,
@@ -32,8 +31,7 @@ class CRUDMeetingRoom(CRUDBase):
                 CharityProject.name == project_name
             )
         )
-        db_project_full_amount = db_project_full_amount.scalars().first()
-        return db_project_full_amount
+        return db_project_full_amount.scalars().first()
 
 
 charity_project_crud = CRUDMeetingRoom(CharityProject)
