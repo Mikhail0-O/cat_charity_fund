@@ -85,8 +85,7 @@ async def update_project(
         if obj_in.full_amount == project.invested_amount:
             project.fully_invested = True
             project.close_date = datetime.now()
-    await session.commit()
-    await session.refresh(project)
+    await charity_project_crud.refresh_db(session, project)
     return project
 
 

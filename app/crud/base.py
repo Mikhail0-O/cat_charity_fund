@@ -1,9 +1,9 @@
-from typing import Optional
+from typing import Optional, Union
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import User
+from app.models import User, Donation, CharityProject
 
 
 class CRUDBase:
@@ -70,3 +70,11 @@ class CRUDBase:
         await session.delete(db_obj)
         await session.commit()
         return db_obj
+
+    async def refresh_db(
+            self,
+            session: AsyncSession,
+            object: Union[Donation, CharityProject]
+    ):
+        await session.commit()
+        await session.refresh(object)
