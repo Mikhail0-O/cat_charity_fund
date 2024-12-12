@@ -1,12 +1,9 @@
-from datetime import datetime
-
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.validators import (
     check_charity_project_empty, check_charity_project_open_or_close,
-    check_name_duplicate, check_project_full_amount_not_lt_full_amount_current,
+    check_name_duplicate,
     check_name_and_full_amount)
 from app.core.db import get_async_session
 from app.core.user import current_superuser
