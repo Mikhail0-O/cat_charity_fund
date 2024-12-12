@@ -5,7 +5,7 @@ from app.core.db import get_async_session
 from app.core.investing import the_logic_of_investing
 from app.core.user import current_superuser, current_user
 from app.crud.donation import donation_crud
-from app.models import User
+from app.models import User, CharityProject
 from app.schemas.donation import (DonationCreate, DonationDB,
                                   DonationDBForSuperUsers)
 
@@ -25,8 +25,8 @@ async def create_new_donation(
     new_donation = await donation_crud.create(
         donation, session, user
     )
-    all_uninvested_projects = await donation_crud.get_uninvested_projects(
-        session
+    all_uninvested_projects = await donation_crud.get_uninvested(
+        session, CharityProject
     )
     the_logic_of_investing(all_uninvested_projects, new_donation)
     await donation_crud.refresh_db(session, new_donation)

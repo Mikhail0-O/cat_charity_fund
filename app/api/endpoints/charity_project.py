@@ -6,7 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.validators import (
     check_charity_project_empty, check_charity_project_open_or_close,
-    check_name_duplicate, check_project_full_amount_not_lt_full_amount_current)
+    check_name_duplicate, check_project_full_amount_not_lt_full_amount_current,
+    check_name_and_full_amount)
 from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_project import charity_project_crud
@@ -14,6 +15,7 @@ from app.models import Donation
 from app.schemas.charity_project import (CharityProjectCreate,
                                          CharityProjectDB,
                                          CharityProjectUpdate)
+from core.investing import distribution_of_donations
 
 
 router = APIRouter()
@@ -31,20 +33,11 @@ async def create_new_charity_project(
 
     await check_name_duplicate(charity_project.name, session)
     new_project = await charity_project_crud.create(charity_project, session)
-    unallocated_donations = await session.execute(
-        select(Donation).where(
-            Donation.fully_invested == False # noqa
-        ).order_by(Donation.create_date)
+    unallocated_donations = await charity_project_crud.get_uninvested(
+        session, Donation
     )
-    sum_unallocated_donations = sum(
-        [unallocated_donation.full_amount for unallocated_donation
-            in unallocated_donations.scalars().all()]
-    )
-    if sum_unallocated_donations >= new_project.full_amount:
-        new_project.fully_invested = True
-        new_project.close_date = datetime.now()
-    await session.commit()
-    await session.refresh(new_project)
+    distribution_of_donations(unallocated_donations, new_project)
+    await charity_project_crud.refresh_db(session, new_project)
     return new_project
 
 
@@ -71,20 +64,7 @@ async def update_project(
     project = await check_charity_project_open_or_close(
         project_id, session
     )
-    if obj_in.name is not None:
-        await check_name_duplicate(obj_in.name, session)
-    project = await charity_project_crud.update(
-        db_obj=project,
-        obj_in=obj_in,
-        session=session,
-    )
-    if obj_in.full_amount is not None:
-        await check_project_full_amount_not_lt_full_amount_current(
-            project_id, obj_in.dict(), session
-        )
-        if obj_in.full_amount == project.invested_amount:
-            project.fully_invested = True
-            project.close_date = datetime.now()
+    await check_name_and_full_amount(obj_in, project, session)
     await charity_project_crud.refresh_db(session, project)
     return project
 

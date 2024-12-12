@@ -78,3 +78,16 @@ class CRUDBase:
     ):
         await session.commit()
         await session.refresh(object)
+
+    async def get_uninvested(
+            self,
+            session: AsyncSession,
+            object_model: Union[Donation, CharityProject]
+    ):
+        uninvested = await session.execute(
+            select(object_model).where(
+                object_model.fully_invested == False # noqa 
+
+            ).order_by(object_model.create_date)
+        )
+        return uninvested.scalars().all()

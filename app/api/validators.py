@@ -1,9 +1,12 @@
+from datetime import datetime
+
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.charity_project import charity_project_crud
 from app.models import CharityProject
 from http import HTTPStatus
+from app.schemas.charity_project import CharityProjectUpdate
 
 
 async def check_name_duplicate(
@@ -84,3 +87,24 @@ async def check_project_full_amount_not_lt_full_amount_current(
             detail=('Невозможно редактировать требуемую сумму '
                     'если новая меньше текущей')
         )
+
+
+async def check_name_and_full_amount(
+        obj_in: CharityProjectUpdate,
+        project: CharityProject,
+        session: AsyncSession,
+) -> None:
+    if obj_in.name is not None:
+        await check_name_duplicate(obj_in.name, session)
+    project = await charity_project_crud.update(
+        db_obj=project,
+        obj_in=obj_in,
+        session=session,
+    )
+    if obj_in.full_amount is not None:
+        await check_project_full_amount_not_lt_full_amount_current(
+            project.id, obj_in.dict(), session
+        )
+        if obj_in.full_amount == project.invested_amount:
+            project.fully_invested = True
+            project.close_date = datetime.now()

@@ -19,3 +19,13 @@ def the_logic_of_investing(all_uninvested_projects, new_donation):
             new_donation.fully_invested = True
             new_donation.close_date = datetime.now()
             break
+
+
+def distribution_of_donations(unallocated_donations, new_project):
+    sum_unallocated_donations = sum(
+        [unallocated_donation.full_amount for unallocated_donation
+            in unallocated_donations]
+    )
+    if sum_unallocated_donations >= new_project.full_amount:
+        new_project.fully_invested = True
+        new_project.close_date = datetime.now()
