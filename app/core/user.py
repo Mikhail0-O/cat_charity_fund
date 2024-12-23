@@ -14,7 +14,7 @@ from app.core.config import settings
 from app.core.db import get_async_session
 from app.schemas.user import UserCreate
 from app.models.user import User
-from settings import TOKEN_LIFETIME_SECONDS, MIN_LENGTH_PASSWORD
+from app.settings import TOKEN_LIFETIME_SECONDS, MIN_LENGTH_PASSWORD
 
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):

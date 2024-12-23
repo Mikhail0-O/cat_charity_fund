@@ -12,7 +12,7 @@ from app.models import Donation
 from app.schemas.charity_project import (CharityProjectCreate,
                                          CharityProjectDB,
                                          CharityProjectUpdate)
-from core.investing import distribution_of_donations
+from app.core.investing import distribution_of_donations
 
 
 router = APIRouter()

@@ -1,6 +1,7 @@
 from typing import Optional
+from datetime import timedelta
 
-from sqlalchemy import select
+from sqlalchemy import select, asc, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import CRUDBase
@@ -32,6 +33,37 @@ class CRUDMeetingRoom(CRUDBase):
             )
         )
         return db_project_full_amount.scalars().first()
+
+    async def get_projects_by_completion_rate(
+            self,
+            session: AsyncSession,
+    ) -> list[dict[str, int]]:
+        projects = await session.execute(
+            select(
+                CharityProject.id,
+                CharityProject.name,
+                CharityProject.description,
+                CharityProject.create_date,
+                CharityProject.close_date,
+                (
+                    func.julianday(CharityProject.close_date) -
+                    func.julianday(CharityProject.create_date)
+                ).label('completion_time')
+            ).where(
+                CharityProject.fully_invested == 1,
+                CharityProject.close_date.isnot(None),
+            ).order_by(asc('completion_time')))
+        projects = projects.all()
+        result = []
+        for project in projects:
+            completion_timedelta = timedelta(days=project.completion_time)
+            result.append({
+                'id': project.id,
+                'name': project.name,
+                'description': project.description,
+                'completion_time': str(completion_timedelta),
+            })
+        return result
 
 
 charity_project_crud = CRUDMeetingRoom(CharityProject)
